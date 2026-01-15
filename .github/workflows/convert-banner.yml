@@ -1,0 +1,38 @@
+name: Convert Banner to WebP
+
+on:
+  push:
+    paths:
+      - 'banner.png'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup FFmpeg
+        uses: FedericoCarboni/setup-ffmpeg@v3
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Convert PNG to WebP
+        run: |
+          ffmpeg -i banner.png -c:v libwebp -q:v 100 -compression_level 6 banner.webp -y
+
+      - name: Commit and Push changes
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add banner.webp
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "assets: convert banner.png to banner.webp"
+            git push
+          fi
