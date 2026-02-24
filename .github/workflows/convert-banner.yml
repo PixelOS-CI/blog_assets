@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'banner.png'
+      - '**/*.png'
   workflow_dispatch:
 
 permissions:
@@ -22,17 +23,19 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Convert PNG to WebP
-        run: |
-          ffmpeg -i banner.png -c:v libwebp -q:v 100 -compression_level 6 banner.webp -y
+        run: python3 .github/scripts/convert_to_webp.py
 
       - name: Commit and Push changes
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add banner.webp
+
+          # Add any generated .webp files
+          find . -type f -iname '*.webp' -not -path './.*/*' -print0 | xargs -0 --no-run-if-empty git add || true
+
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else
-            git commit -m "assets: convert banner.png to banner.webp"
+            git commit -m "assets: convert PNGs to WebP"
             git push
           fi
