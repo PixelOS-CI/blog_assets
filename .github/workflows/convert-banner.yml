@@ -17,10 +17,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup FFmpeg
-        uses: FedericoCarboni/setup-ffmpeg@v3
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Check FFmpeg
+        run: ffmpeg -version
 
       - name: Convert PNG to WebP
         run: python3 .github/scripts/convert_to_webp.py
